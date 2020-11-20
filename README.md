@@ -1,2 +1,2 @@
-# proteomicsTMT-1
+# proteomicsTMT
 nf-core pipeline for proteomics TMT analysis
