@@ -1,4 +1,4 @@
-# ![daichengxin/proteomicsTMT](docs/images/nf-core-proteomicsTMT_logo.png)
+![image](/blob/main/docs/images/nf-core-proteomicsTMT_logo.png)
 
 **Proteomics Tandem Mass Tags quantification (TMT) analysis pipeline using OpenMS and MSstats, with feature quantification, feature summarization, quality control and group-based statistical analysis.**.
 
