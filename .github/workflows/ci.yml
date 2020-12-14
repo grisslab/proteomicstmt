@@ -4,7 +4,7 @@ name: nf-core CI
 on:
   push:
     branches:
-      - develop
+      - main
   pull_request:
   release:
     types: [published]
