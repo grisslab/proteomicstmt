@@ -1,6 +1,5 @@
 name: nf-core CI
-# This workflow is triggered on pushes and PRs to the repository.
-# It runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
+# This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
 on:
   push:
     branches:
@@ -11,22 +10,26 @@ on:
 
 jobs:
   test:
+    name: Run workflow tests
+    # Only run on push if this is the nf-core dev branch (merged PRs)
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'bigbio/proteomicsTMT') }}
+    runs-on: ubuntu-latest
     env:
       NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
       TOWER_ACCESS_TOKEN: ${{ secrets.NONAWS_TOWER_ACCESS_TOKEN }}
       TEST_PROFILE: ${{ matrix.test_profile }}
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.01.0']
+        nxf_ver: ['20.04.0']
         test_profile: ['test']
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
       - name: Determine tower usage
         shell: bash
-        run: echo "::set-env name=TOWER::`[ -z "$TOWER_ACCESS_TOKEN" ] && echo '' || echo '-with-tower'`"
+        run: echo $( [ -z "$TOWER_ACCESS_TOKEN" ] && echo 'TOWER=' || echo 'TOWER=-with-tower' ) >> $GITHUB_ENV
         id: tower_usage
       - name: Extract branch name
         if: github.event_name == 'push'
@@ -36,20 +39,28 @@ jobs:
           ref=${ref#"refs/heads/"}
           ref=${ref#"refs/"}
           ref=${ref//\//-}
-          echo "::set-env name=RUN_NAME::$ref"
+          echo "RUN_NAME=$ref" >> $GITHUB_ENV
         id: extract_branch
       - name: Extract PR number
         if: github.event_name == 'pull_request'
         shell: bash
-        run: echo "::set-env name=RUN_NAME::PR`jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH"`"
+        run: echo "RUN_NAME=PR$(jq --raw-output .pull_request.number $GITHUB_EVENT_PATH)" >> $GITHUB_ENV
         id: extract_pr
+
       - name: Build new docker image
         run: docker build --no-cache . -t nfcore/proteomicstmt:dev
+
       - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+
       - name: Run pipeline with test data
+        # TODO nf-core: You can customise CI pipeline run tests as required
+        # For example: adding multiple test runs with different parameters
+        # Remember that you can parallelise this by using strategy.matrix
         run: |
           nextflow run ${GITHUB_WORKSPACE} "$TOWER" -name "$RUN_NAME" -profile $TEST_PROFILE,docker --outdir ${TEST_PROFILE}_results
       - name: Gather failed logs
