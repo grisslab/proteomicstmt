@@ -653,7 +653,9 @@ process search_engine_comet {
      }
 
      // for consensusID the cutting rules need to be the same. So we adapt to the loosest rules from MSGF
-
+     // TODO find another solution. In ProteomicsLFQ we re-run PeptideIndexer (remove??) and if we
+     // e.g. add XTandem, after running ConsensusID it will lose the auto-detection ability for the
+     // XTandem specific rules.
      if (params.search_engines.contains("msgf"))
      {
         if (enzyme == 'Trypsin') enzyme = 'Trypsin/P'
