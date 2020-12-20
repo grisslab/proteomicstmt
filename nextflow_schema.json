@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/proteomicsTMT/master/nextflow_schema.json",
-    "title": "nf-core/proteomicsTMT pipeline parameters",
+    "$id": "https://raw.githubusercontent.com/nf-core/proteomicstmt/master/nextflow_schema.json",
+    "title": "nf-core/proteomicstmt pipeline parameters",
     "description": "Proteomics Tandem Mass Tags quantification (TMT) analysis pipeline using OpenMS and MSstats, with feature quantification, feature summarization, quality control and group-based statistical analysis.",
     "type": "object",
     "definitions": {

@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+
 args = commandArgs(trailingOnly=TRUE)
 
 usage <- "Rscript msstats_plfq.R input.csv input.mztab [list of contrasts or 'pairwise'] [default control condition or ''] [output prefix]"

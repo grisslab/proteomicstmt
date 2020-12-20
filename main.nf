@@ -1,13 +1,11 @@
 #!/usr/bin/env nextflow
 /*
-=======================================================================================
-
-
-ProteomicsTMT
-
-
+========================================================================================
+                         nf-core/proteomicstmt
+========================================================================================
+ nf-core/proteomicstmt Analysis Pipeline.
  #### Homepage / Documentation
- +++++++++++++++++++++++++++++
+ https://github.com/nf-core/proteomicstmt
 ----------------------------------------------------------------------------------------
 */
 
@@ -19,7 +17,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/proteomicsTMT --spectra '*.mzML' --database '*.fasta' -profile docker
+    nextflow run nf-core/proteomicstmt --spectra '*.mzML' --database '*.fasta' -profile docker
 
     Main arguments:
       --input                       Path/URI to PRIDE Sample to data relation format file (SDRF) OR path to input spectra as mzML or Thermo Raw
@@ -205,8 +203,8 @@ if (workflow.profile.contains('awsbatch')) {
 
 
 // Stage config files
-//ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-//ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
+ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 
 // Validate input
 if (isCollectionOrArray(params.input))
@@ -655,7 +653,9 @@ process search_engine_comet {
      }
 
      // for consensusID the cutting rules need to be the same. So we adapt to the loosest rules from MSGF
-
+     // TODO find another solution. In ProteomicsLFQ we re-run PeptideIndexer (remove??) and if we
+     // e.g. add XTandem, after running ConsensusID it will lose the auto-detection ability for the
+     // XTandem specific rules.
      if (params.search_engines.contains("msgf"))
      {
         if (enzyme == 'Trypsin') enzyme = 'Trypsin/P'
@@ -1299,38 +1299,11 @@ process ptxqc {
      """
 }
 
-if (!params.enable_qc)
-{
-  ch_ptxqc_report = Channel.empty()
-}
 
 
 //--------------------------------------------------------------- //
 //---------------------- Nextflow specifics --------------------- //
 //--------------------------------------------------------------- //
-
-def nfcoreHeader() {
-    // Log colors ANSI codes
-    c_black = params.monochrome_logs ? '' : "\033[0;30m";
-    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
-    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
-    c_dim = params.monochrome_logs ? '' : "\033[2m";
-    c_green = params.monochrome_logs ? '' : "\033[0;32m";
-    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
-    c_reset = params.monochrome_logs ? '' : "\033[0m";
-    c_white = params.monochrome_logs ? '' : "\033[0;37m";
-    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
-
-    return """    -${c_dim}--------------------------------------------------${c_reset}-
-                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
-    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
-    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
-    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
-                                            ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/proteomicsTMT v ${workflow.manifest.version}${c_reset}
-    -${c_dim}--------------------------------------------------${c_reset}-
-    """.stripIndent()
-}
 
 
 // Header log info
@@ -1338,6 +1311,7 @@ log.info nfcoreHeader()
 def summary = [:]
 if (workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Run Name']         = custom_runName ?: workflow.runName
+// TODO nf-core: Report custom parameters here
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Output dir']       = params.outdir
@@ -1369,10 +1343,10 @@ Channel.from(summary.collect{ [it.key, it.value] })
     .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
     .reduce { a, b -> return [a, b].join("\n            ") }
     .map { x -> """
-    id: 'nf-core-proteomicsTMT-summary'
+    id: 'nf-core-proteomicstmt-summary'
     description: " - this information is collected when the pipeline is started."
-    section_name: 'nf-core/proteomicsTMT Workflow Summary'
-    section_href: 'https://github.com/nf-core/proteomicsTMT'
+    section_name: 'nf-core/proteomicstmt Workflow Summary'
+    section_href: 'https://github.com/nf-core/proteomicstmt'
     plot_type: 'html'
     data: |
         <dl class=\"dl-horizontal\">
@@ -1444,9 +1418,9 @@ process output_documentation {
 workflow.onComplete {
 
     // Set up the e-mail variables
-    def subject = "[nf-core/proteomicsTMT] Successful: $workflow.runName"
+    def subject = "[nf-core/proteomicstmt] Successful: $workflow.runName"
     if (!workflow.success) {
-        subject = "[nf-core/proteomicsTMT] FAILED: $workflow.runName"
+        subject = "[nf-core/proteomicstmt] FAILED: $workflow.runName"
     }
     def email_fields = [:]
     email_fields['version'] = workflow.manifest.version
@@ -1477,7 +1451,7 @@ workflow.onComplete {
         if (workflow.success && ch_ptxqc_report.println()) {
             mqc_report = ch_ptxqc_report.getVal()
             if (mqc_report.getClass() == ArrayList) {
-                log.warn "[nf-core/proteomicsTMT] Found multiple reports from process 'ptxqc', will use only one"
+                log.warn "[nf-core/proteomicstmt] Found multiple reports from process 'ptxqc', will use only one"
                 mqc_report = mqc_report[0]
             }
         }
@@ -1485,7 +1459,7 @@ workflow.onComplete {
           mqc_report = ""
         }
     } catch (all) {
-        log.warn "[nf-core/proteomicsTMT] Could not attach PTXQC report to summary email"
+        log.warn "[nf-core/proteomicstmt] Could not attach PTXQC report to summary email"
     }
 
     // Check if we are only sending emails on failure
@@ -1517,7 +1491,7 @@ workflow.onComplete {
             if (params.plaintext_email) { throw GroovyException('Send plaintext e-mail, not HTML') }
             // Try to send HTML e-mail using sendmail
             [ 'sendmail', '-t' ].execute() << sendmail_html
-            log.info "[nf-core/proteomicsTMT] Sent summary e-mail to $email_address (sendmail)"
+            log.info "[nf-core/proteomicstmt] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
             def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
@@ -1525,7 +1499,7 @@ workflow.onComplete {
               mail_cmd += [ '-A', mqc_report ]
             }
             mail_cmd.execute() << email_html
-            log.info "[nf-core/proteomicsTMT] Sent summary e-mail to $email_address (mail)"
+            log.info "[nf-core/proteomicstmt] Sent summary e-mail to $email_address (mail)"
         }
     }
 
@@ -1551,14 +1525,37 @@ workflow.onComplete {
     }
 
     if (workflow.success) {
-        log.info "-${c_purple}[nf-core/proteomicsTMT]${c_green} Pipeline completed successfully${c_reset}-"
+        log.info "-${c_purple}[nf-core/proteomicstmt]${c_green} Pipeline completed successfully${c_reset}-"
     } else {
         checkHostname()
-        log.info "-${c_purple}[nf-core/proteomicsTMT]${c_red} Pipeline completed with errors${c_reset}-"
+        log.info "-${c_purple}[nf-core/proteomicstmt]${c_red} Pipeline completed with errors${c_reset}-"
     }
 
 }
 
+
+def nfcoreHeader() {
+    // Log colors ANSI codes
+    c_black = params.monochrome_logs ? '' : "\033[0;30m";
+    c_blue = params.monochrome_logs ? '' : "\033[0;34m";
+    c_cyan = params.monochrome_logs ? '' : "\033[0;36m";
+    c_dim = params.monochrome_logs ? '' : "\033[2m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_purple = params.monochrome_logs ? '' : "\033[0;35m";
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_white = params.monochrome_logs ? '' : "\033[0;37m";
+    c_yellow = params.monochrome_logs ? '' : "\033[0;33m";
+
+    return """    -${c_dim}--------------------------------------------------${c_reset}-
+                                            ${c_green},--.${c_black}/${c_green},-.${c_reset}
+    ${c_blue}        ___     __   __   __   ___     ${c_green}/,-._.--~\'${c_reset}
+    ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
+    ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
+                                            ${c_green}`._,._,\'${c_reset}
+    ${c_purple}  nf-core/proteomicslfq v${workflow.manifest.version}${c_reset}
+    -${c_dim}--------------------------------------------------${c_reset}-
+    """.stripIndent()
+}
 
 def checkHostname() {
     def c_reset = params.monochrome_logs ? '' : "\033[0m"
