@@ -6,8 +6,8 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconda::openms=2.7.0pre
-  - bioconda::openms-thirdparty=2.7.0pre
+  - openms::openms=2.7.0pre
+  - openms::openms-thirdparty=2.7.0pre
   - bioconda::bioconductor-msstats=3.20.1 # will include R
   - bioconda::sdrf-pipelines=0.0.10 # for SDRF conversion
   - conda-forge::r-ptxqc=1.0.5 # for QC reports
