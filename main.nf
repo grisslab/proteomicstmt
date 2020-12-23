@@ -120,8 +120,7 @@ def helpMessage() {
 
 
     IDFilter:
-      --protgroup_score_cutoff      The score which should be reached by a protein group to be kept.Use in combination with 'delete_unreferenced_peptide_
-                                    hits' to remove affected peptides.  (Default: 0.0)
+      --protein_level_fdr_cutoff      Protein level FDR cutoff (this affects and chooses the peptides used for quantification)
 
 
     IDMapper:
@@ -1177,7 +1176,7 @@ process epi_filter{
     IDFilter -in ${consus_epi} \\
              -out ${consus_epi.baseName}_filt.consensusXML \\
              -threads ${task.cpus} \\
-             -score:protgroup ${params.protgroup_score_cutoff} 
+             -score:prot ${params.protein_level_fdr_cutoff}
              > ${consus_epi.baseName}_idfilter.log
     """
 }
