@@ -153,7 +153,7 @@ def helpMessage() {
       --ratios						Add the log2 ratios of the abundance values to the output.(Default false)
       --normalize					Scale peptide abundances so that medians of all samples are equal.(Default false)
       --fix_peptides				Use the same peptides for protein quantification across all samples.(Default false)
-
+      --mztab_export      			Output file mzTAB (default '')
 
 
     Other options:
@@ -1207,32 +1207,6 @@ process resolve_conflict{
 }
 
 
-process mztab_export{
-	label 'process_medium'
-
-	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
-    publishDir "${params.outdir}/mztab", mode: 'copy'
-
-
-	input:
-	 file(cons_epi_filt_resconf) from ch_mztabexport
-
-
-	output:
-	 file "out.mzTab" into out_mztab_ptmt
-
-	script:
-	"""
-	MzTabExporter -in ${cons_epi_filt_resconf} \\
-				  -out out.mztab \\
-				  -debug 10 \\
-				  -threads ${task.cpus} \\
-				  > mztabexporter.log
-	"""
-}
-
-
-
 process pro_quant{
 	label 'process_medium'
 
@@ -1248,7 +1222,7 @@ process pro_quant{
 	output:
 	 file "protein_out.csv" optional true into downstreams_tool_A
 	 file "peptide_out.csv" into downstreams_tool_B
-	 // file "out.mzTab" into out_mztab_ptmt output mztab will report error
+	 file "*.mzTab" optional true into out_mztab
 
 
 	 script:
@@ -1257,6 +1231,7 @@ process pro_quant{
 	 				   -design ${pro_quant_exp} \\
 	 				   -out protein_out.csv \\
 	 				   -peptide_out peptide_out.csv \\
+	 				   -mztab ${params.mztab_export} \\
 	 				   -top ${params.top} \\
 	 				   -average ${params.average} \\
 	 				   -best_charge_and_fraction \\
@@ -1283,7 +1258,7 @@ process ptxqc {
      params.enable_qc
 
     input:
-     file mzTab from out_mztab_ptmt
+     file mzTab from out_mztab
 
     output:
      file "*.html" into ch_ptxqc_report
