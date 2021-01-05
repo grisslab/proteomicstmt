@@ -1187,6 +1187,7 @@ process resolve_conflict{
 
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
+	publishDir "${params.outdir}/resolved_consensusXML", mode: 'copy'
 	input:
 	 file(consus_epi_filt) from confict_res
 
