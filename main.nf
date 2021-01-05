@@ -132,7 +132,7 @@ def helpMessage() {
 
 	FileMerger:
 	  --annotate_file_origin		Store the original filename in each feature using meta value "file_origin".(Default false).
-	  --append_method				Append consensusMaps rowise or colwise.(Default append_rows).
+	  --append_method			Append consensusMaps rowise or colwise.(Default append_rows).
 
 
 
@@ -140,20 +140,20 @@ def helpMessage() {
     Inference:
       --protein_fdr            		Additionally calculate the target-decoy FDR on protein-level based on the posteriors(Default false).
       --greedy_group_resolution		Default none.
-      --top_PSMs					Consider only top X PSMs per spectrum. 0 considers all.(Default 1).
+      --top_PSMs			Consider only top X PSMs per spectrum. 0 considers all.(Default 1).
 
     IDConflictResolver:
       --resolve_between_features	A map may contain multiple features with both identical (possibly modified i.e. not stripped) sequence and charge state. 							   The feature with the 'highest intensity' is very likely the most reliable one.Default(off),highest_intensity
 
     ProteinQuantifier:
-      --top 						Calculate protein abundance from this number of proteotypic peptides (most abundant first; '0' for all, Default 3)
-      --average						Averaging method used to compute protein abundances from peptide abundances.
-      								(median,mean,weighted_mean,sum Default median).
+      --top 				Calculate protein abundance from this number of proteotypic peptides (most abundant first; '0' for all, Default 3)
+      --average				Averaging method used to compute protein abundances from peptide abundances.
+      							(median,mean,weighted_mean,sum Default median).
       --best_charge_and_fraction	Distinguish between fraction and charge states of a peptide.(Default false).
-      --ratios						Add the log2 ratios of the abundance values to the output.(Default false)
-      --normalize					Scale peptide abundances so that medians of all samples are equal.(Default false)
-      --fix_peptides				Use the same peptides for protein quantification across all samples.(Default false)
-      --mztab_export      			Output file mzTAB (default '')
+      --ratios				Add the log2 ratios of the abundance values to the output.(Default false)
+      --normalize			Scale peptide abundances so that medians of all samples are equal.(Default false)
+      --fix_peptides			Use the same peptides for protein quantification across all samples.(Default false)
+      --mztab_export      		Output file mzTAB (default true)
 
 
     Other options:
@@ -1133,7 +1133,7 @@ process file_merge{
 process epifany{
 	label 'process_medium'
     
-    publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+    	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
 	input:
 	 file(consus_file) from id_merge_to_epi
@@ -1158,7 +1158,7 @@ process epifany{
 
 
 process epi_filter{
-	label 'process_very_low'
+    label 'process_very_low'
     label 'process_single_thread'
 
     publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
@@ -1211,7 +1211,7 @@ process pro_quant{
 	label 'process_medium'
 
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
-    publishDir "${params.outdir}/proteomics_tmt", mode: 'copy'
+    	publishDir "${params.outdir}/proteomics_tmt", mode: 'copy'
 
 
 	input:
@@ -1226,22 +1226,40 @@ process pro_quant{
 
 
 	 script:
-	 """
-	 ProteinQuantifier -in ${epi_filt_resolve} \\
-	 				   -design ${pro_quant_exp} \\
-	 				   -out protein_out.csv \\
-	 				   -peptide_out peptide_out.csv \\
-	 				   -mztab ${params.mztab_export} \\
-	 				   -top ${params.top} \\
-	 				   -average ${params.average} \\
-	 				   -best_charge_and_fraction \\
-	 				   -ratios \\
-	 				   -threads ${task.cpus} \\
-	 				   -consensus:normalize \\
-	 				   -consensus:fix_peptides \\
-	 				   > pro_quant.log
-	 """
+	      if( params.mztab_export )
+              """
+              ProteinQuantifier -in ${epi_filt_resolve} \\
+                        	-design ${pro_quant_exp} \\
+                        	-out protein_out.csv \\
+                        	-peptide_out peptide_out.csv \\
+                        	-mztab out.mzTab \\
+                        	-top ${params.top} \\
+                        	-average ${params.average} \\
+                        	-best_charge_and_fraction \\
+                        	-ratios \\
+                        	-threads ${task.cpus} \\
+                        	-consensus:normalize \\
+                        	-consensus:fix_peptides \\
+                        	> pro_quant.log
+              """
+
+     	      else
+              """
+              ProteinQuantifier -in ${epi_filt_resolve} \\
+                        	-design ${pro_quant_exp} \\
+                        	-out protein_out.csv \\
+                        	-peptide_out peptide_out.csv \\
+                        	-top ${params.top} \\
+                        	-average ${params.average} \\
+                        	-best_charge_and_fraction \\
+                        	-ratios \\
+                        	-threads ${task.cpus} \\
+                        	-consensus:normalize \\
+                        	-consensus:fix_peptides \\
+                        	> pro_quant.log
+     	      """
 }
+
 
 
 //TODO allow user config yml (as second arg to the script
@@ -1526,7 +1544,7 @@ def nfcoreHeader() {
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/proteomicslfq v${workflow.manifest.version}${c_reset}
+    ${c_purple}  nf-core/proteomicstmt v${workflow.manifest.version}${c_reset}
     -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
