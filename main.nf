@@ -41,6 +41,9 @@ def helpMessage() {
       --label   					label method (TMT6plex,TMT10plex,TMT11plex)
       --fragment_method				dissolve method (HCD,CID)
       --min_precursor_intensity     Minimum intensity of the precursor to be extracted. (Default 1.0)
+      --min_reporter_intensity      Minimum intensity of the individual reporter ions to be extracted. (Default 0.0)
+      --min_precursor_purity        Minimum fraction of the total intensity in the isolation window of the precursor spectrum attributable to the 
+                                    selected precursor. (Default 0.0)
       --normalization 				Enable normalization of channel intensities with respect to the reference channel.(default false)
       --reference_channel			Number of the reference channel
       --isotope_correction			Enable isotope correction (highly recommended,default true)
@@ -176,6 +179,9 @@ if (params.help) {
     helpMessage()
     exit 0
 }
+
+// TODOs
+//  * Add support for precursor purity filtering (-extraction:min_precursor_purity)
 
 /*
  * SET UP CONFIGURATION VARIABLES
@@ -527,6 +533,7 @@ process isobaric_analyzer {
 	  				   -threads ${task.cpus} \\
 	  				   -quantification:normalization \\
 	  				   -extraction:select_activation "${diss_meth}" \\
+               -extraction:min_precursor_intensity ${params.min_precursor_intensity} \\
 	  				   -extraction:min_reporter_intensity ${params.min_reporter_intensity} \\
 	  				   -extraction:min_precursor_purity ${params.min_precursor_purity} \\
 	  				   -extraction:precursor_isotope_deviation ${params.precursor_isotope_deviation} \\
