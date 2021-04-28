@@ -127,13 +127,11 @@ def helpMessage() {
       --rt_tolerance				RT tolerance (in seconds) for the matching of peptide identifications and consensus features (Default 5.0).
       --mz_tolerance				m/z tolerance (in ppm or Da) for the matching of peptide identifications and consensus features(Default 20.0).
       --mz_measure					Unit of 'mz_tolerance'. ('ppm', 'Da',Default 'ppm')
-      --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used. 
+      --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used.
 									If 'peptide',masses are computed from the sequences of peptide hits.(Defalut 'peptide')
 
 	FileMerger:
 	  --annotate_file_origin		Store the original filename in each feature using meta value "file_origin".(Default false).
-	  --append_method				Append consensusMaps rowise or colwise.(Default append_rows).
-
 
 
 
@@ -502,7 +500,7 @@ if (params.num_enzyme_termini == "fully")
 
 process isobaric_analyzer {
 	label 'process_medium'
-	
+
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
 	input:
@@ -1083,7 +1081,7 @@ process idmapper{
 
 	input:
 	 tuple mzml_id, file(id_file_filter), file(consensusXML) from ptmt_in_id.mix(ptmt_in_id_luciphor).combine(id_files_consensusXML, by: 0)
-	 
+
 	output:
 	 file("${id_file_filter.baseName}_map.consensusXML") into id_map_to_merger
 
@@ -1121,7 +1119,7 @@ process file_merge{
 	 FileMerger -in ${(id_map as List).join(' ')} \\
 	 			-in_type consensusXML \\
 	 			-annotate_file_origin  \\
-	 			-append_method ${params.append_method} \\
+	 			-append_method 'append_cols' \\
 	 			-threads ${task.cpus} \\
 	 			-debug 10 \\
 	 			-out ID_mapper_merge.consensusXML \\
@@ -1132,7 +1130,7 @@ process file_merge{
 
 process epifany{
 	label 'process_medium'
-    
+
     publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
 	input:
@@ -1153,7 +1151,7 @@ process epifany{
 			 -algorithm:top_PSMs ${params.top_PSMs} \\
 			 -out ${consus_file.baseName}_epi.consensusXML \\
 			 > ${consus_file.baseName}_epi.log
-	 """                                       
+	 """
 }
 
 
