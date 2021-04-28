@@ -1184,13 +1184,14 @@ process resolve_conflict{
 	label 'process_medium'
 
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+	publishDir "${params.outdir}/resolved_consensusXML", mode: 'copy', pattern: '*.consensusXML'
 
 	input:
 	 file(consus_epi_filt) from confict_res
 
 
 	output:
-	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant, ch_mztabexport
+	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant
 
 
 	script:
@@ -1205,37 +1206,11 @@ process resolve_conflict{
 }
 
 
-process mztab_export{
-	label 'process_medium'
-
-	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
-    publishDir "${params.outdir}/mztab", mode: 'copy'
-
-
-	input:
-	 file(cons_epi_filt_resconf) from ch_mztabexport
-
-
-	output:
-	 file "out.mzTab" into out_mztab_ptmt
-
-	script:
-	"""
-	MzTabExporter -in ${cons_epi_filt_resconf} \\
-				  -out out.mztab \\
-				  -debug 10 \\
-				  -threads ${task.cpus} \\
-				  > mztabexporter.log
-	"""
-}
-
-
-
 process pro_quant{
 	label 'process_medium'
 
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
-    publishDir "${params.outdir}/proteomics_tmt", mode: 'copy'
+	publishDir "${params.outdir}/proteomics_tmt", mode: 'copy'
 
 
 	input:
@@ -1246,23 +1221,42 @@ process pro_quant{
 	output:
 	 file "protein_out.csv" optional true into downstreams_tool_A
 	 file "peptide_out.csv" into downstreams_tool_B
-	 // file "out.mzTab" into out_mztab_ptmt output mztab will report error
+	 file "*.mzTab" optional true into out_mztab
 
 
 	 script:
-	 """
-	 ProteinQuantifier -in ${epi_filt_resolve} \\
-	 				   -design ${pro_quant_exp} \\
-	 				   -out protein_out.csv \\
-	 				   -peptide_out peptide_out.csv \\
-	 				   -top ${params.top} \\
-	 				   -average ${params.average} \\
-	 				   -best_charge_and_fraction \\
-	 				   -ratios \\
-	 				   -threads ${task.cpus} \\
-	 				   -consensus:normalize \\
-	 				   -consensus:fix_peptides \\
-	 				   > pro_quant.log
+
+	 if( params.mztab_export )
+	 	"""	
+	 	ProteinQuantifier -in ${epi_filt_resolve} \\
+	 				   	-design ${pro_quant_exp} \\
+	 				   	-out protein_out.csv \\
+	 				   	-peptide_out peptide_out.csv \\
+             		   	-mztab out.mzTab \\
+	 				   	-top ${params.top} \\
+	 				   	-average ${params.average} \\
+	 				   	-best_charge_and_fraction \\
+	 				   	-ratios \\
+	 				   	-threads ${task.cpus} \\
+	 				   	-consensus:normalize \\
+	 				   	-consensus:fix_peptides \\
+	 				   	> pro_quant.log
+	 	"""
+
+	 else 
+	 	"""
+	 	ProteinQuantifier -in ${epi_filt_resolve} \\
+	 				   	-design ${pro_quant_exp} \\
+	 				   	-out protein_out.csv \\
+	 				   	-peptide_out peptide_out.csv \\
+	 				   	-top ${params.top} \\
+	 				   	-average ${params.average} \\
+	 				   	-best_charge_and_fraction \\
+	 				   	-ratios \\
+	 				   	-threads ${task.cpus} \\
+	 				   	-consensus:normalize \\
+	 				   	-consensus:fix_peptides \\
+	 				   	> pro_quant.log
 	 """
 }
 
@@ -1281,7 +1275,7 @@ process ptxqc {
      params.enable_qc
 
     input:
-     file mzTab from out_mztab_ptmt
+     file mzTab from out_mztab
 
     output:
      file "*.html" into ch_ptxqc_report
@@ -1549,7 +1543,7 @@ def nfcoreHeader() {
     ${c_blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${c_yellow}}  {${c_reset}
     ${c_blue}  | \\| |       \\__, \\__/ |  \\ |___     ${c_green}\\`-._,-`-,${c_reset}
                                             ${c_green}`._,._,\'${c_reset}
-    ${c_purple}  nf-core/proteomicslfq v${workflow.manifest.version}${c_reset}
+    ${c_purple}  nf-core/proteomicstmt v${workflow.manifest.version}${c_reset}
     -${c_dim}--------------------------------------------------${c_reset}-
     """.stripIndent()
 }
