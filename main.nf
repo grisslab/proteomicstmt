@@ -1232,7 +1232,7 @@ process pro_quant{
 	 				   	-design ${pro_quant_exp} \\
 	 				   	-out protein_out.csv \\
 	 				   	-peptide_out peptide_out.csv \\
-             		   	-mztab out.mzTab \\
+             	-mztab out.mzTab \\
 	 				   	-top ${params.top} \\
 	 				   	-average ${params.average} \\
 	 				   	-best_charge_and_fraction \\
