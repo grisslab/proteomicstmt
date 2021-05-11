@@ -1227,7 +1227,7 @@ process pro_quant{
 	 script:
 
 	 if( params.mztab_export )
-	 	"""	
+	 	"""
 	 	ProteinQuantifier -in ${epi_filt_resolve} \\
 	 				   	-design ${pro_quant_exp} \\
 	 				   	-out protein_out.csv \\
@@ -1240,10 +1240,11 @@ process pro_quant{
 	 				   	-threads ${task.cpus} \\
 	 				   	-consensus:normalize \\
 	 				   	-consensus:fix_peptides \\
+	 				   	-debug 100 \\
 	 				   	> pro_quant.log
 	 	"""
 
-	 else 
+	 else
 	 	"""
 	 	ProteinQuantifier -in ${epi_filt_resolve} \\
 	 				   	-design ${pro_quant_exp} \\
@@ -1256,6 +1257,7 @@ process pro_quant{
 	 				   	-threads ${task.cpus} \\
 	 				   	-consensus:normalize \\
 	 				   	-consensus:fix_peptides \\
+	 				   	-debug 100 \\
 	 				   	> pro_quant.log
 	 """
 }
