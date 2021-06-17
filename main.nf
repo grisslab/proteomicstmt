@@ -130,13 +130,12 @@ def helpMessage() {
       --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used.
 									If 'peptide',masses are computed from the sequences of peptide hits.(Defalut 'peptide')
 
-	FileMerger:
-	  --annotate_file_origin		Store the original filename in each feature using meta value "file_origin".(Default false).
+	  FileMerger:
+	    --annotate_file_origin		Store the original filename in each feature using meta value "file_origin".(Default false).
 
 
 
     Inference:
-      --protein_fdr            		Additionally calculate the target-decoy FDR on protein-level based on the posteriors (Default false).
       --greedy_group_resolution		Default none.
       --top_PSMs					Consider only top X PSMs per spectrum. 0 considers all.(Default 1).
 
