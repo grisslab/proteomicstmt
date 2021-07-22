@@ -522,7 +522,6 @@ process isobaric_analyzer {
 	  IsobaricAnalyzer -type ${label} \\
 	  				   -in ${mzml_file} \\
 	  				   -threads ${task.cpus} \\
-	  				   -quantification:normalization \\
 	  				   -extraction:select_activation "${diss_meth}" \\
 	  				   -extraction:min_reporter_intensity ${params.min_reporter_intensity} \\
 	  				   -extraction:min_precursor_purity ${params.min_precursor_purity} \\
@@ -679,6 +678,7 @@ process search_engine_comet {
                    -fragment_mass_tolerance ${bin_tol} \\
                    -fragment_bin_offset ${bin_offset} \\
                    -debug ${params.db_debug} \\
+				   -force \\
                    > ${mzml_file.baseName}_comet.log
      """
 }
@@ -995,9 +995,11 @@ process idfilter {
 }
 
 
+
 ptmt_in_id = params.enable_mod_localization
                     ? Channel.empty()
                     : id_filtered
+
 
 // TODO make luciphor pick its own score so we can skip this step
 process idscoreswitcher_for_luciphor {
@@ -1013,7 +1015,7 @@ process idscoreswitcher_for_luciphor {
     output:
      tuple mzml_id, file("${id_file.baseName}_pep.idXML") into id_filtered_luciphor_pep
      file "*.log"
-
+    
     when:
      params.enable_mod_localization
 
@@ -1029,6 +1031,8 @@ process idscoreswitcher_for_luciphor {
                         > ${id_file.baseName}_switch_pep_for_luciphor.log
      """
 }
+
+
 
 
 process luciphor {
@@ -1083,6 +1087,7 @@ process idmapper{
 
 	output:
 	 file("${id_file_filter.baseName}_map.consensusXML") into id_map_to_merger
+	 file "*.log"
 
 	script:
 	 """
@@ -1111,7 +1116,7 @@ process file_merge{
 
 	output:
 	 file("ID_mapper_merge.consensusXML") into id_merge_to_epi
-
+	 file "*.log"
 
 	script:
 	 """
@@ -1145,9 +1150,9 @@ process epifany{
 	 Epifany -in ${consus_file} \\
 	 		 -protein_fdr true \\
 	 		 -threads ${task.cpus} \\
-	 		 -debug 1 \\
-       -algorithm:keep_best_PSM_only false \\
-       -algorithm:update_PSM_probabilities false \\
+	 		 -debug 10 \\
+       		 -algorithm:keep_best_PSM_only false \\
+       		 -algorithm:update_PSM_probabilities false \\
 	 		 -greedy_group_resolution ${params.greedy_group_resolution} \\
 			 -algorithm:top_PSMs ${params.top_PSMs} \\
 			 -out ${consus_file.baseName}_epi.consensusXML \\
@@ -1157,27 +1162,28 @@ process epifany{
 
 
 process epi_filter{
-  label 'process_very_low'
-  label 'process_single_thread'
+	label 'process_very_low'
+	label 'process_single_thread'
 
-  publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
-  input:
-   file(consus_epi) from epi_idfilter
+	input:
+	 file(consus_epi) from epi_idfilter
 
+	output:
+	 file("${consus_epi.baseName}_filt.consensusXML") into conflict_res
+	 file "*.log"
 
-  output:
-   file("${consus_epi.baseName}_filt.consensusXML") into conflict_res
-
-
-  script:
-  """
-  IDFilter -in ${consus_epi} \\
+	script:
+	"""
+	IDFilter -in ${consus_epi} \\
            -out ${consus_epi.baseName}_filt.consensusXML \\
            -threads ${task.cpus} \\
-           -score:prot ${params.protein_level_fdr_cutoff}
+		   -delete_unreferenced_peptide_hits \\
+           -score:prot ${params.protein_level_fdr_cutoff} \\
+		   -debug 10 \\
            > ${consus_epi.baseName}_idfilter.log
-  """
+	"""
 }
 
 
@@ -1193,11 +1199,11 @@ process resolve_conflict{
 
 	output:
 	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant
-
+	 file "*.log"
 
 	script:
 	"""
-  IDConflictResolver -in ${consus_epi_filt} \\
+	IDConflictResolver -in ${consus_epi_filt} \\
 						  -threads ${task.cpus} \\
 						  -debug 1 \\
 						  -resolve_between_features ${params.res_between_fet} \\
@@ -1224,7 +1230,7 @@ process pro_quant{
 	 file "protein_out.csv" optional true into downstreams_tool_A
 	 file "peptide_out.csv" into downstreams_tool_B
 	 file "*.mzTab" optional true into out_mztab
-
+	 file "*.log"
 
 	script:
     mztab = params.mztab_export ? "-mztab out.mzTab" : ""
@@ -1269,6 +1275,7 @@ process ptxqc {
      file "*.Rmd"
      file "*.pdf"
      file "*.txt"
+	 file "*.log"
 
     script:
      """

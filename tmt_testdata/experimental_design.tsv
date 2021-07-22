@@ -1,63 +1,99 @@
 Fraction_Group	Fraction	Spectra_Filepath	Label	Sample
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	1	1
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	2	2
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	3	3
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	4	4
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	5	5
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	6	6
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	7	7
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	8	8
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	9	9
-1	1	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr68.mzML	10	10
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	1	1
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	2	2
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	3	3
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	4	4
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	5	5
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	6	6
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	7	7
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	8	8
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	9	9
-1	2	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr69.mzML	10	10
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	1	1
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	2	2
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	3	3
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	4	4
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	5	5
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	6	6
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	7	7
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	8	8
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	9	9
-1	3	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr70.mzML	10	10
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	1	1
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	2	2
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	3	3
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	4	4
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	5	5
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	6	6
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	7	7
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	8	8
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	9	9
-1	4	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr71.mzML	10	10
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	1	1
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	2	2
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	3	3
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	4	4
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	5	5
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	6	6
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	7	7
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	8	8
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	9	9
-1	5	LJMP_Melanoma_QE_20170310_TMT_set5_1mgIPG3-10_fr72.mzML	10	10
+1	1	MCF10Achalcone_1.mzML	1	1
+1	1	MCF10Achalcone_1.mzML	2	2
+1	1	MCF10Achalcone_1.mzML	3	3
+1	1	MCF10Achalcone_1.mzML	4	4
+1	1	MCF10Achalcone_1.mzML	5	5
+1	1	MCF10Achalcone_1.mzML	6	6
+2	1	MCF10Achalcone_2.mzML	1	1
+2	1	MCF10Achalcone_2.mzML	2	2
+2	1	MCF10Achalcone_2.mzML	3	3
+2	1	MCF10Achalcone_2.mzML	4	4
+2	1	MCF10Achalcone_2.mzML	5	5
+2	1	MCF10Achalcone_2.mzML	6	6
+3	1	MCF10Achalcone_3.mzML	1	1
+3	1	MCF10Achalcone_3.mzML	2	2
+3	1	MCF10Achalcone_3.mzML	3	3
+3	1	MCF10Achalcone_3.mzML	4	4
+3	1	MCF10Achalcone_3.mzML	5	5
+3	1	MCF10Achalcone_3.mzML	6	6
+4	1	MCF12Achalcone_1.mzML	1	7
+4	1	MCF12Achalcone_1.mzML	2	8
+4	1	MCF12Achalcone_1.mzML	3	9
+4	1	MCF12Achalcone_1.mzML	4	10
+4	1	MCF12Achalcone_1.mzML	5	11
+4	1	MCF12Achalcone_1.mzML	6	12
+5	1	MCF12Achalcone_2.mzML	1	7
+5	1	MCF12Achalcone_2.mzML	2	8
+5	1	MCF12Achalcone_2.mzML	3	9
+5	1	MCF12Achalcone_2.mzML	4	10
+5	1	MCF12Achalcone_2.mzML	5	11
+5	1	MCF12Achalcone_2.mzML	6	12
+6	1	MCF12Achalcone_3.mzML	1	7
+6	1	MCF12Achalcone_3.mzML	2	8
+6	1	MCF12Achalcone_3.mzML	3	9
+6	1	MCF12Achalcone_3.mzML	4	10
+6	1	MCF12Achalcone_3.mzML	5	11
+6	1	MCF12Achalcone_3.mzML	6	12
+7	1	MDAMB231chalcone_1.mzML	1	13
+7	1	MDAMB231chalcone_1.mzML	2	14
+7	1	MDAMB231chalcone_1.mzML	3	15
+7	1	MDAMB231chalcone_1.mzML	4	16
+7	1	MDAMB231chalcone_1.mzML	5	17
+7	1	MDAMB231chalcone_1.mzML	6	18
+8	1	MDAMB231chalcone_2.mzML	1	13
+8	1	MDAMB231chalcone_2.mzML	2	14
+8	1	MDAMB231chalcone_2.mzML	3	15
+8	1	MDAMB231chalcone_2.mzML	4	16
+8	1	MDAMB231chalcone_2.mzML	5	17
+8	1	MDAMB231chalcone_2.mzML	6	18
+9	1	MDAMB231chalcone_3.mzML	1	13
+9	1	MDAMB231chalcone_3.mzML	2	14
+9	1	MDAMB231chalcone_3.mzML	3	15
+9	1	MDAMB231chalcone_3.mzML	4	16
+9	1	MDAMB231chalcone_3.mzML	5	17
+9	1	MDAMB231chalcone_3.mzML	6	18
+10	1	MDAMB468chalcone_1.mzML	1	19
+10	1	MDAMB468chalcone_1.mzML	2	20
+10	1	MDAMB468chalcone_1.mzML	3	21
+10	1	MDAMB468chalcone_1.mzML	4	22
+10	1	MDAMB468chalcone_1.mzML	5	23
+10	1	MDAMB468chalcone_1.mzML	6	24
+11	1	MDAMB468chalcone_2.mzML	1	19
+11	1	MDAMB468chalcone_2.mzML	2	20
+11	1	MDAMB468chalcone_2.mzML	3	21
+11	1	MDAMB468chalcone_2.mzML	4	22
+11	1	MDAMB468chalcone_2.mzML	5	23
+11	1	MDAMB468chalcone_2.mzML	6	24
+12	1	MDAMB468chalcone_3.mzML	1	19
+12	1	MDAMB468chalcone_3.mzML	2	20
+12	1	MDAMB468chalcone_3.mzML	3	21
+12	1	MDAMB468chalcone_3.mzML	4	22
+12	1	MDAMB468chalcone_3.mzML	5	23
+12	1	MDAMB468chalcone_3.mzML	6	24
 
 Sample	MSstats_Condition	MSstats_BioReplicate	MSstats_Mixture
-1	drug immune checkpoint inhibitors|treatment	1	1
-2	drug immune checkpoint inhibitors|before_treatment	2	1
-3	drug immune checkpoint inhibitors|treatment	3	1
-4	drug immune checkpoint inhibitors|before_treatment	4	1
-5	drug immune checkpoint inhibitors|treatment	5	1
-6	drug MAPK-inhibitors|before_treatment	6	1
-7	drug MAPK-inhibitors|treatment	7	1
-8	drug immune checkpoint inhibitors|before_treatment	8	1
-9	drug immune checkpoint inhibitors|treatment	9	1
-10	control|control	10	1
+1	Control	1	1
+2	Control	2	1
+3	CH-23	3	1
+4	CH-23	4	1
+5	CH-8	5	1
+6	CH-24	6	1
+7	Control	7	2
+8	Control	8	2
+9	CH-23	9	2
+10	CH-23	10	2
+11	CH-8	11	2
+12	CH-24	12	2
+13	Control	13	3
+14	Control	14	3
+15	CH-23	15	3
+16	CH-23	16	3
+17	CH-8	17	3
+18	CH-24	18	3
+19	Control	19	4
+20	Control	20	4
+21	CH-23	21	4
+22	CH-23	22	4
+23	CH-8	23	4
+24	CH-24	24	4
