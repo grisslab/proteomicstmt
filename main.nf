@@ -371,7 +371,6 @@ process raw_file_conversion {
 
 
     publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
-	publishDir "${params.outdir}/mzMLs", mode: 'copy', pattern: '*.mzML'
 
     input:
      tuple mzml_id, path(rawfile) from branched_input.raw
