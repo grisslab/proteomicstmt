@@ -323,8 +323,7 @@ if (params.expdesign)
 {
     Channel
         .fromPath(params.expdesign)
-        .set { ch_pro_quant_exp }
-        .set { ch_expdesign }
+        .into { ch_pro_quant_exp; ch_expdesign }
 }
 
 
