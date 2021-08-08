@@ -38,10 +38,10 @@ def helpMessage() {
       --affix_type                  Prefix (default) or suffix (WARNING: Percolator only supports prefices)
 
     Isobaric analyze:
-      --label   					label method (TMT6plex,TMT10plex,TMT11plex)
+      --label   					label method (TMT6plex,TMT10plex,TMT11plex,TMT16plex)
       --fragment_method				dissolve method (HCD,CID)
       --min_precursor_intensity     Minimum intensity of the precursor to be extracted. (Default 1.0)
-      --normalization 				Enable normalization of channel intensities with respect to the reference channel.(default false)
+      --iso_normalization         Enable normalization of channel intensities with respect to the reference channel.(default false)
       --reference_channel			Number of the reference channel
       --isotope_correction			Enable isotope correction (highly recommended,default true)
 
@@ -150,7 +150,7 @@ def helpMessage() {
       --ratios						Add the log2 ratios of the abundance values to the output.(Default false)
       --normalize					Scale peptide abundances so that medians of all samples are equal.(Default false)
       --fix_peptides				Use the same peptides for protein quantification across all samples.(Default false)
-
+      --include_all         Include results for proteins with fewer proteotypic peptides than indicated by 'top' (no effect if 'top' is 0 or 1 Default True)
 
 
     Other options:
@@ -324,6 +324,7 @@ if (params.expdesign)
     Channel
         .fromPath(params.expdesign)
         .set { ch_pro_quant_exp }
+        .set { ch_expdesign }
 }
 
 
@@ -518,6 +519,8 @@ process isobaric_analyzer {
 	  else if (diss_meth == 'CID') diss_meth = 'Collision-induced dissociation'
 	  else if (diss_meth == 'ETD') diss_meth = 'Electron transfer dissociation'
 	  else if (diss_meth == 'ECD') diss_meth = 'Electron capture dissociation'
+    iso_normalization = params.iso_normalization ? "-quantification:normalization" : ""
+
 	  """
 	  IsobaricAnalyzer -type ${label} \\
 	  				   -in ${mzml_file} \\
@@ -526,6 +529,8 @@ process isobaric_analyzer {
 	  				   -extraction:min_reporter_intensity ${params.min_reporter_intensity} \\
 	  				   -extraction:min_precursor_purity ${params.min_precursor_purity} \\
 	  				   -extraction:precursor_isotope_deviation ${params.precursor_isotope_deviation} \\
+               ${iso_normalization} \\
+               -${label}:reference_channel ${params.reference_channel} \\
 	  				   -debug ${params.iso_debug} \\
 	  				   -out ${mzml_file.baseName}_iso.consensusXML \\
 	  				   > ${mzml_file.baseName}_isob.log
@@ -1198,7 +1203,7 @@ process resolve_conflict{
 
 
 	output:
-	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant
+	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant, msstatsConvert
 	 file "*.log"
 
 	script:
@@ -1233,23 +1238,54 @@ process pro_quant{
 	 file "*.log"
 
 	script:
-    mztab = params.mztab_export ? "-mztab out.mzTab" : ""
-    """
-   	ProteinQuantifier -in ${epi_filt_resolve} \\
+   mztab = params.mztab_export ? "-mztab out.mzTab" : ""
+   include_all = params.include_all ? "-include_all" : ""
+   fix_peptides = params.fix_peptides ? "-fix_peptides" : ""
+   normalize = params.normalize ? "-consensus:normalize" : ""
+   
+   """
+   ProteinQuantifier -in ${epi_filt_resolve} \\
    				   	-design ${pro_quant_exp} \\
    				   	-out protein_out.csv \\
    				   	-peptide_out peptide_out.csv \\
-             	${mztab} \\
+              ${mztab} \\
    				   	-top ${params.top} \\
    				   	-average ${params.average} \\
+              ${include_all} \\
+              ${fix_peptides} \\
    				   	-best_charge_and_fraction \\
    				   	-ratios \\
    				   	-threads ${task.cpus} \\
-   				   	-consensus:normalize \\
-   				   	-consensus:fix_peptides \\
+              ${normalize} \\
    				   	-debug 100 \\
    				   	> pro_quant.log
-   	"""
+   """
+}
+
+
+process MsstatsConverter{
+  label 'process_medium'
+    
+  publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+  publishDir "${params.outdir}/proteomics_tmt", mode: 'copy', pattern: '*.csv'
+
+  input:
+   file (resolve_msstats_con) from msstatsConvert
+   file exp_file from ch_expdesign
+
+  output:
+   file "*.csv"
+   file "*.log"
+
+   script:
+   """
+   MSstatsConverter -in ${resolve_msstats_con} \\
+                      -in_design ${exp_file} \\
+                      -method ISO \\
+                      -out out_msstats.csv \\
+                      -debug 10 \\
+                      > msstatsConverter.log
+   """
 }
 
 
