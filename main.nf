@@ -855,8 +855,7 @@ process idpep {
      tuple mzml_id, file(id_file) from id_files_idx_ForIDPEP_FDR.mix(id_files_idx_ForIDPEP_noFDR)
 
     output:
-     tuple mzml_id, file("${id_file.baseName}_idpep.idXML"), val("q-value_score") into id_files_idpep, id_files_idpep_consID
-	 file("${id_file.baseName}_idpep.idXML") into id_files_idpep_multiqc
+     tuple mzml_id, file("${id_file.baseName}_idpep.idXML"), val("q-value_score") into id_files_idpep, id_files_idpep_consID, id_files_idpep_multiqc
      file "*.log"
 
     when:
@@ -1321,13 +1320,16 @@ process ptxqc {
 
 
 mzmls_multiqc.mix(mzmls_multiqc_picked)
-  .join(id_files_perc_multiqc.mix(id_files_idpep_multiqc))
   .multiMap{ it ->
       mzmls: it[1]
-      ids: it[2]
   }
-  .set{ch_ptmt}
+  .set{ch_ptmt1}
 
+id_files_perc_multiqc.mix(id_files_idpep_multiqc)
+  .multiMap{ it ->
+      ids: it[1]
+  }
+  .set{ch_ptmt2}
 
 process pmultiqc {
 
@@ -1339,9 +1341,9 @@ process pmultiqc {
 
     input:
      file design from ch_expdesign_multiqc
-     file 'mzMLs/*' from ch_ptmt.mzmls.collect()
+     file 'mzMLs/*' from ch_ptmt1.mzmls.collect()
      file 'proteomicslfq/*' from ch_out_mztab_multiqc
-     file 'raw_ids/*' from ch_ptmt.ids.collect()
+     file 'raw_ids/*' from ch_ptmt2.ids.collect()
 
     output:
      file '*.html' into ch_multiqc_report
