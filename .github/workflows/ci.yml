@@ -75,13 +75,15 @@ jobs:
         with:
           name: failed_logs
           path: failed_logs
-      - uses: actions/upload-artifact@v1
+      - uses: actions/upload-artifact@v2
         if: always()
         name: Upload results
         with:
           name: ${{ env.TEST_PROFILE }}_results
-          path: ${{ env.TEST_PROFILE }}_results
-      - uses: actions/upload-artifact@v1
+          path: |
+            ${{ env.TEST_PROFILE }}_results
+            !${{ env.TEST_PROFILE }}_results/raw_file_conversion
+      - uses: actions/upload-artifact@v2
         if: always()
         name: Upload log
         with:
