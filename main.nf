@@ -1145,6 +1145,7 @@ process file_merge{
 	label 'process_single_thread'
 
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+	publishDir "${params.outdir}/quant_merged_mapped", mode: 'copy', pattern: '*.consensusXML'
 
 	input:
 	 file(id_map) from id_map_to_merger.collect()
