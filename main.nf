@@ -37,7 +37,7 @@ def helpMessage() {
       --decoy_affix                 The decoy prefix or suffix used or to be used (default: DECOY_)
       --affix_type                  Prefix (default) or suffix (WARNING: Percolator only supports prefices)
 
-    Isobaric analyze:
+    Isobaric analyzer:
       --label   					label method (TMT6plex,TMT10plex,TMT11plex,TMT16plex)
       --fragment_method				dissolve method (HCD,CID)
       --min_precursor_intensity     Minimum intensity of the precursor to be extracted. (Default 1.0)
@@ -51,6 +51,7 @@ def helpMessage() {
       --enzyme                      Enzymatic cleavage (e.g. 'unspecific cleavage' or 'Trypsin' [default], see OpenMS enzymes)
       --num_enzyme_termini          Specify the termini where the cleavage rule has to match (default:
                                          'fully' valid: 'semi', 'fully')
+      --isotope_error_range         Which isotope errors to allow for peptide precursors. Specify "minIsoErr,maxIsoErr" (default: '0,1')
       --num_hits                    Number of peptide hits per spectrum (PSMs) in output file (default: '1')
       --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
       --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
@@ -177,6 +178,20 @@ if (params.help) {
 /*
  * SET UP CONFIGURATION VARIABLES
  */
+
+////////////////////////////////////////////////////
+/* --       MORE COMPLEX VALIDATIONS           -- */
+////////////////////////////////////////////////////+
+if (params.isotope_error_range)
+{
+    def isoRange = params.isotope_error_range.split(",")
+    if (params.search_engines.contains("comet") && ((isoRange[0].toInteger() < 0 || isoRange[1].toInteger() > 3) && !(isoRange[0].toInteger() == -1 && isoRange[1].toInteger() == 3)))
+    {
+        log.error "Specified isotope_error_range " + params.isotope_error_range + " not supported by Comet. Either use MSGF only, or change the parameter."
+        exit 1
+    }
+}
+
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -590,6 +605,7 @@ process search_engine_msgf {
                      -max_precursor_charge ${params.max_precursor_charge} \\
                      -min_peptide_length ${params.min_peptide_length} \\
                      -max_peptide_length ${params.max_peptide_length} \\
+                     -isotope_error_range ${params.isotope_error_range} \\
                      -enzyme "${enzyme}" \\
                      -tryptic ${params.num_enzyme_termini} \\
                      -precursor_mass_tolerance ${prec_tol} \\
@@ -663,6 +679,20 @@ process search_engine_comet {
         else if (enzyme == 'Chymotrypsin') enzyme = 'Chymotrypsin/P'
         else if (enzyme == 'Lys-C') enzyme = 'Lys-C/P'
      }
+
+     // converting isotope_error_range from MSGF style to Comet style. Compatibility is checked in the
+     // beginning.
+     def isoSlashComet = "0/1"
+     if (params.isotope_error_range)
+     {
+        def isoRangeComet = params.isotope_error_range.split(",")
+        isoSlashComet = ""
+        for (c in isoRangeComet[0].toInteger()..isoRangeComet[1].toInteger()-1)
+        {
+            isoSlashComet += c + "/"
+        }
+        isoSlashComet += isoRangeComet[1]
+     }
      """
      CometAdapter  -in ${mzml_file} \\
                    -out ${mzml_file.baseName}_comet.idXML \\
@@ -673,6 +703,7 @@ process search_engine_comet {
                    -num_hits ${params.num_hits} \\
                    -num_enzyme_termini ${params.num_enzyme_termini} \\
                    -enzyme "${enzyme}" \\
+                   -isotope_error ${isoSlashComet} \\
                    -precursor_charge ${params.min_precursor_charge}:${params.max_precursor_charge} \\
                    -fixed_modifications ${fixed.tokenize(',').collect { "'${it}'" }.join(" ") } \\
                    -variable_modifications ${variable.tokenize(',').collect { "'${it}'" }.join(" ") } \\
