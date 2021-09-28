@@ -37,14 +37,18 @@ def helpMessage() {
       --decoy_affix                 The decoy prefix or suffix used or to be used (default: DECOY_)
       --affix_type                  Prefix (default) or suffix (WARNING: Percolator only supports prefices)
 
-    Isobaric analyze:
-      --label   					label method (TMT6plex,TMT10plex,TMT11plex)
+    Isobaric analyzer:
+      --label   					label method (TMT6plex,TMT10plex,TMT11plex,TMT16plex)
       --fragment_method				dissolve method (HCD,CID)
       --min_precursor_intensity     Minimum intensity of the precursor to be extracted. (Default 1.0)
+<<<<<<< HEAD
       --min_reporter_intensity      Minimum intensity of the individual reporter ions to be extracted. (Default 0.0)
       --min_precursor_purity        Minimum fraction of the total intensity in the isolation window of the precursor spectrum attributable to the 
                                     selected precursor. (Default 0.0)
       --normalization 				Enable normalization of channel intensities with respect to the reference channel.(default false)
+=======
+      --iso_normalization         Enable normalization of channel intensities with respect to the reference channel.(default false)
+>>>>>>> bigbio/dev
       --reference_channel			Number of the reference channel
       --isotope_correction			Enable isotope correction (highly recommended,default true)
 
@@ -54,6 +58,7 @@ def helpMessage() {
       --enzyme                      Enzymatic cleavage (e.g. 'unspecific cleavage' or 'Trypsin' [default], see OpenMS enzymes)
       --num_enzyme_termini          Specify the termini where the cleavage rule has to match (default:
                                          'fully' valid: 'semi', 'fully')
+      --isotope_error_range         Which isotope errors to allow for peptide precursors. Specify "minIsoErr,maxIsoErr" (default: '0,1')
       --num_hits                    Number of peptide hits per spectrum (PSMs) in output file (default: '1')
       --fixed_mods                  Fixed modifications ('Carbamidomethyl (C)', see OpenMS modifications)
       --variable_mods               Variable modifications ('Oxidation (M)', see OpenMS modifications)
@@ -130,18 +135,15 @@ def helpMessage() {
       --rt_tolerance				RT tolerance (in seconds) for the matching of peptide identifications and consensus features (Default 5.0).
       --mz_tolerance				m/z tolerance (in ppm or Da) for the matching of peptide identifications and consensus features(Default 20.0).
       --mz_measure					Unit of 'mz_tolerance'. ('ppm', 'Da',Default 'ppm')
-      --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used. 
+      --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used.
 									If 'peptide',masses are computed from the sequences of peptide hits.(Defalut 'peptide')
 
-	FileMerger:
-	  --annotate_file_origin		Store the original filename in each feature using meta value "file_origin".(Default false).
-	  --append_method				Append consensusMaps rowise or colwise.(Default append_rows).
-
+	  FileMerger:
+	    --annotate_file_origin		Store the original filename in each feature using meta value "file_origin".(Default false).
 
 
 
     Inference:
-      --protein_fdr            		Additionally calculate the target-decoy FDR on protein-level based on the posteriors(Default false).
       --greedy_group_resolution		Default none.
       --top_PSMs					Consider only top X PSMs per spectrum. 0 considers all.(Default 1).
 
@@ -156,7 +158,7 @@ def helpMessage() {
       --ratios						Add the log2 ratios of the abundance values to the output.(Default false)
       --normalize					Scale peptide abundances so that medians of all samples are equal.(Default false)
       --fix_peptides				Use the same peptides for protein quantification across all samples.(Default false)
-
+      --include_all         Include results for proteins with fewer proteotypic peptides than indicated by 'top' (no effect if 'top' is 0 or 1 Default True)
 
 
     Other options:
@@ -186,6 +188,20 @@ if (params.help) {
 /*
  * SET UP CONFIGURATION VARIABLES
  */
+
+////////////////////////////////////////////////////
+/* --       MORE COMPLEX VALIDATIONS           -- */
+////////////////////////////////////////////////////+
+if (params.isotope_error_range)
+{
+    def isoRange = params.isotope_error_range.split(",")
+    if (params.search_engines.contains("comet") && ((isoRange[0].toInteger() < 0 || isoRange[1].toInteger() > 3) && !(isoRange[0].toInteger() == -1 && isoRange[1].toInteger() == 3)))
+    {
+        log.error "Specified isotope_error_range " + params.isotope_error_range + " not supported by Comet. Either use MSGF only, or change the parameter."
+        exit 1
+    }
+}
+
 
 // Has the run name been specified by the user?
 // this has the bonus effect of catching both -name and --name
@@ -278,7 +294,7 @@ if (!sdrf_file) {
        file sdrf from ch_sdrf
 
       output:
-       file "experimental_design.tsv" into ch_expdesign, ch_pro_quant_exp
+       file "experimental_design.tsv" into ch_expdesign, ch_pro_quant_exp, ch_expdesign_multiqc
        file "openms.tsv" into ch_sdrf_config_file
 
       when:
@@ -332,7 +348,7 @@ if (params.expdesign)
 {
     Channel
         .fromPath(params.expdesign)
-        .set { ch_pro_quant_exp }
+        .into { ch_pro_quant_exp; ch_expdesign; ch_expdesign_multiqc }
 }
 
 
@@ -421,11 +437,11 @@ process mzml_indexing {
 if (params.openms_peakpicking)
 {
   branched_input_mzMLs.inputIndexedMzML.mix(mzmls_converted).mix(mzmls_indexed).set{mzmls_pp}
-  (mzmls_isobaric_analyzer, mzmls_msgf, mzmls_comet, mzmls_luciphor) = [Channel.empty(), Channel.empty(), Channel.empty(), Channel.empty()]
+  (mzmls_isobaric_analyzer, mzmls_msgf, mzmls_comet, mzmls_luciphor, mzmls_multiqc) = [Channel.empty(), Channel.empty(), Channel.empty(), Channel.empty(), Channel.empty()]
 }
 else
 {
-  branched_input_mzMLs.inputIndexedMzML.mix(mzmls_converted).mix(mzmls_indexed).into{mzmls_isobaric_analyzer; mzmls_comet; mzmls_msgf; mzmls_luciphor}
+  branched_input_mzMLs.inputIndexedMzML.mix(mzmls_converted).mix(mzmls_indexed).into{mzmls_isobaric_analyzer; mzmls_comet; mzmls_msgf; mzmls_luciphor; mzmls_multiqc}
   mzmls_pp = Channel.empty()
 }
 
@@ -476,7 +492,7 @@ process openms_peakpicker {
       params.openms_peakpicking
 
     output:
-     tuple mzml_id, file("out/${mzml_file.baseName}.mzML") into isobaric_analyzer_picked, mzmls_msgf_picked, mzmls_comet_picked, mzmls_plfq_picked
+     tuple mzml_id, file("out/${mzml_file.baseName}.mzML") into isobaric_analyzer_picked, mzmls_msgf_picked, mzmls_comet_picked, mzmls_multiqc_picked
      file "*.log"
 
     script:
@@ -508,7 +524,7 @@ if (params.num_enzyme_termini == "fully")
 
 process isobaric_analyzer {
 	label 'process_medium'
-	
+
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
 	input:
@@ -520,23 +536,26 @@ process isobaric_analyzer {
 
 	output:
 	  tuple mzml_id, file("${mzml_file.baseName}_iso.consensusXML") into id_files_consensusXML
-      file "*.log"
+	  file "*.log"
 
 	script:
 	  if (diss_meth == 'HCD') diss_meth = 'High-energy collision-induced dissociation'
 	  else if (diss_meth == 'CID') diss_meth = 'Collision-induced dissociation'
 	  else if (diss_meth == 'ETD') diss_meth = 'Electron transfer dissociation'
 	  else if (diss_meth == 'ECD') diss_meth = 'Electron capture dissociation'
+	  iso_normalization = params.iso_normalization ? "-quantification:normalization" : ""
+
 	  """
 	  IsobaricAnalyzer -type ${label} \\
 	  				   -in ${mzml_file} \\
 	  				   -threads ${task.cpus} \\
-	  				   -quantification:normalization \\
 	  				   -extraction:select_activation "${diss_meth}" \\
                -extraction:min_precursor_intensity ${params.min_precursor_intensity} \\
 	  				   -extraction:min_reporter_intensity ${params.min_reporter_intensity} \\
 	  				   -extraction:min_precursor_purity ${params.min_precursor_purity} \\
 	  				   -extraction:precursor_isotope_deviation ${params.precursor_isotope_deviation} \\
+                       ${iso_normalization} \\
+                       -${label}:reference_channel ${params.reference_channel} \\
 	  				   -debug ${params.iso_debug} \\
 	  				   -out ${mzml_file.baseName}_iso.consensusXML \\
 	  				   > ${mzml_file.baseName}_isob.log
@@ -597,6 +616,7 @@ process search_engine_msgf {
                      -max_precursor_charge ${params.max_precursor_charge} \\
                      -min_peptide_length ${params.min_peptide_length} \\
                      -max_peptide_length ${params.max_peptide_length} \\
+                     -isotope_error_range ${params.isotope_error_range} \\
                      -enzyme "${enzyme}" \\
                      -tryptic ${params.num_enzyme_termini} \\
                      -precursor_mass_tolerance ${prec_tol} \\
@@ -670,6 +690,20 @@ process search_engine_comet {
         else if (enzyme == 'Chymotrypsin') enzyme = 'Chymotrypsin/P'
         else if (enzyme == 'Lys-C') enzyme = 'Lys-C/P'
      }
+
+     // converting isotope_error_range from MSGF style to Comet style. Compatibility is checked in the
+     // beginning.
+     def isoSlashComet = "0/1"
+     if (params.isotope_error_range)
+     {
+        def isoRangeComet = params.isotope_error_range.split(",")
+        isoSlashComet = ""
+        for (c in isoRangeComet[0].toInteger()..isoRangeComet[1].toInteger()-1)
+        {
+            isoSlashComet += c + "/"
+        }
+        isoSlashComet += isoRangeComet[1]
+     }
      """
      CometAdapter  -in ${mzml_file} \\
                    -out ${mzml_file.baseName}_comet.idXML \\
@@ -680,6 +714,7 @@ process search_engine_comet {
                    -num_hits ${params.num_hits} \\
                    -num_enzyme_termini ${params.num_enzyme_termini} \\
                    -enzyme "${enzyme}" \\
+                   -isotope_error ${isoSlashComet} \\
                    -precursor_charge ${params.min_precursor_charge}:${params.max_precursor_charge} \\
                    -fixed_modifications ${fixed.tokenize(',').collect { "'${it}'" }.join(" ") } \\
                    -variable_modifications ${variable.tokenize(',').collect { "'${it}'" }.join(" ") } \\
@@ -689,6 +724,7 @@ process search_engine_comet {
                    -fragment_mass_tolerance ${bin_tol} \\
                    -fragment_bin_offset ${bin_offset} \\
                    -debug ${params.db_debug} \\
+				   -force \\
                    > ${mzml_file.baseName}_comet.log
      """
 }
@@ -780,7 +816,7 @@ process percolator {
      tuple mzml_id, file(id_file) from id_files_idx_feat
 
     output:
-     tuple mzml_id, file("${id_file.baseName}_perc.idXML"), val("MS:1001491") into id_files_perc, id_files_perc_consID
+     tuple mzml_id, file("${id_file.baseName}_perc.idXML"), val("MS:1001491") into id_files_perc, id_files_perc_consID, id_files_perc_multiqc
      file "*.log"
 
     when:
@@ -861,7 +897,7 @@ process idpep {
      tuple mzml_id, file(id_file) from id_files_idx_ForIDPEP_FDR.mix(id_files_idx_ForIDPEP_noFDR)
 
     output:
-     tuple mzml_id, file("${id_file.baseName}_idpep.idXML"), val("q-value_score") into id_files_idpep, id_files_idpep_consID
+     tuple mzml_id, file("${id_file.baseName}_idpep.idXML"), val("q-value_score") into id_files_idpep, id_files_idpep_consID, id_files_idpep_multiqc
      file "*.log"
 
     when:
@@ -1005,9 +1041,11 @@ process idfilter {
 }
 
 
+
 ptmt_in_id = params.enable_mod_localization
                     ? Channel.empty()
                     : id_filtered
+
 
 // TODO make luciphor pick its own score so we can skip this step
 process idscoreswitcher_for_luciphor {
@@ -1023,7 +1061,7 @@ process idscoreswitcher_for_luciphor {
     output:
      tuple mzml_id, file("${id_file.baseName}_pep.idXML") into id_filtered_luciphor_pep
      file "*.log"
-
+    
     when:
      params.enable_mod_localization
 
@@ -1039,6 +1077,8 @@ process idscoreswitcher_for_luciphor {
                         > ${id_file.baseName}_switch_pep_for_luciphor.log
      """
 }
+
+
 
 
 process luciphor {
@@ -1090,9 +1130,10 @@ process idmapper{
 
 	input:
 	 tuple mzml_id, file(id_file_filter), file(consensusXML) from ptmt_in_id.mix(ptmt_in_id_luciphor).combine(id_files_consensusXML, by: 0)
-	 
+
 	output:
 	 file("${id_file_filter.baseName}_map.consensusXML") into id_map_to_merger
+	 file "*.log"
 
 	script:
 	 """
@@ -1115,20 +1156,21 @@ process file_merge{
 	label 'process_single_thread'
 
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+	publishDir "${params.outdir}/quant_merged_mapped", mode: 'copy', pattern: '*.consensusXML'
 
 	input:
 	 file(id_map) from id_map_to_merger.collect()
 
 	output:
 	 file("ID_mapper_merge.consensusXML") into id_merge_to_epi
-
+	 file "*.log"
 
 	script:
 	 """
 	 FileMerger -in ${(id_map as List).join(' ')} \\
 	 			-in_type consensusXML \\
 	 			-annotate_file_origin  \\
-	 			-append_method ${params.append_method} \\
+	 			-append_method 'append_cols' \\
 	 			-threads ${task.cpus} \\
 	 			-debug 10 \\
 	 			-out ID_mapper_merge.consensusXML \\
@@ -1139,7 +1181,7 @@ process file_merge{
 
 process epifany{
 	label 'process_medium'
-    
+
     publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
 	input:
@@ -1153,39 +1195,42 @@ process epifany{
 	script:
 	 """
 	 Epifany -in ${consus_file} \\
-	 		 -protein_fdr ${params.protein_fdr} \\
+	 		 -protein_fdr true \\
 	 		 -threads ${task.cpus} \\
-	 		 -debug 1 \\
+	 		 -debug 10 \\
+			 -algorithm:keep_best_PSM_only false \\
+			 -algorithm:update_PSM_probabilities false \\
 	 		 -greedy_group_resolution ${params.greedy_group_resolution} \\
 			 -algorithm:top_PSMs ${params.top_PSMs} \\
 			 -out ${consus_file.baseName}_epi.consensusXML \\
 			 > ${consus_file.baseName}_epi.log
-	 """                                       
+	 """
 }
 
 
 process epi_filter{
 	label 'process_very_low'
-    label 'process_single_thread'
+	label 'process_single_thread'
 
-    publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
-    input:
-     file(consus_epi) from epi_idfilter
+	input:
+	 file(consus_epi) from epi_idfilter
 
+	output:
+	 file("${consus_epi.baseName}_filt.consensusXML") into conflict_res
+	 file "*.log"
 
-    output:
-     file("${consus_epi.baseName}_filt.consensusXML") into confict_res
-
-
-    script:
-    """
-    IDFilter -in ${consus_epi} \\
-             -out ${consus_epi.baseName}_filt.consensusXML \\
-             -threads ${task.cpus} \\
-             -score:prot ${params.protein_level_fdr_cutoff}
-             > ${consus_epi.baseName}_idfilter.log
-    """
+	script:
+	"""
+	IDFilter -in ${consus_epi} \\
+			 -out ${consus_epi.baseName}_filt.consensusXML \\
+			 -threads ${task.cpus} \\
+			 -delete_unreferenced_peptide_hits \\
+			 -score:prot ${params.protein_level_fdr_cutoff} \\
+			 -debug 10 \\
+			 > ${consus_epi.baseName}_idfilter.log
+	"""
 }
 
 
@@ -1196,15 +1241,16 @@ process resolve_conflict{
 	publishDir "${params.outdir}/resolved_consensusXML", mode: 'copy', pattern: '*.consensusXML'
 
 	input:
-	 file(consus_epi_filt) from confict_res
+	 file(consus_epi_filt) from conflict_res
 
 
 	output:
-	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant
-
+	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant, msstatsConvert
+	 file "*.log"
 
 	script:
-	"""IDConflictResolver -in ${consus_epi_filt} \\
+	"""
+	IDConflictResolver -in ${consus_epi_filt} \\
 						  -threads ${task.cpus} \\
 						  -debug 1 \\
 						  -resolve_between_features ${params.res_between_fet} \\
@@ -1230,43 +1276,58 @@ process pro_quant{
 	output:
 	 file "protein_out.csv" optional true into downstreams_tool_A
 	 file "peptide_out.csv" into downstreams_tool_B
-	 file "*.mzTab" optional true into out_mztab
+	 file "*.mzTab" into out_mztab, ch_out_mztab_multiqc
+	 file "*.log"
+
+	script:
+	 mztab = params.mztab_export ? "-mztab out.mzTab" : ""
+	 include_all = params.include_all ? "-include_all" : ""
+	 fix_peptides = params.fix_peptides ? "-fix_peptides" : ""
+	 normalize = params.normalize ? "-consensus:normalize" : ""
+	
+	"""
+	ProteinQuantifier -in ${epi_filt_resolve} \\
+					  -design ${pro_quant_exp} \\
+					  -out protein_out.csv \\
+					  -peptide_out peptide_out.csv \\
+					  ${mztab} \\
+					  -top ${params.top} \\
+					  -average ${params.average} \\
+					  ${include_all} \\
+					  ${fix_peptides} \\
+					  -best_charge_and_fraction \\
+					  -ratios \\
+					  -threads ${task.cpus} \\
+					  ${normalize} \\
+					  -debug 100 \\
+					  > pro_quant.log
+   """
+}
 
 
-	 script:
+process MsstatsConverter{
+  label 'process_medium'
+    
+  publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+  publishDir "${params.outdir}/proteomics_tmt", mode: 'copy', pattern: '*.csv'
 
-	 if( params.mztab_export )
-	 	"""	
-	 	ProteinQuantifier -in ${epi_filt_resolve} \\
-	 				   	-design ${pro_quant_exp} \\
-	 				   	-out protein_out.csv \\
-	 				   	-peptide_out peptide_out.csv \\
-             		   	-mztab out.mzTab \\
-	 				   	-top ${params.top} \\
-	 				   	-average ${params.average} \\
-	 				   	-best_charge_and_fraction \\
-	 				   	-ratios \\
-	 				   	-threads ${task.cpus} \\
-	 				   	-consensus:normalize \\
-	 				   	-consensus:fix_peptides \\
-	 				   	> pro_quant.log
-	 	"""
+  input:
+   file (resolve_msstats_con) from msstatsConvert
+   file exp_file from ch_expdesign
 
-	 else 
-	 	"""
-	 	ProteinQuantifier -in ${epi_filt_resolve} \\
-	 				   	-design ${pro_quant_exp} \\
-	 				   	-out protein_out.csv \\
-	 				   	-peptide_out peptide_out.csv \\
-	 				   	-top ${params.top} \\
-	 				   	-average ${params.average} \\
-	 				   	-best_charge_and_fraction \\
-	 				   	-ratios \\
-	 				   	-threads ${task.cpus} \\
-	 				   	-consensus:normalize \\
-	 				   	-consensus:fix_peptides \\
-	 				   	> pro_quant.log
-	 """
+  output:
+   file "*.csv"
+   file "*.log"
+
+   script:
+   """
+   MSstatsConverter -in ${resolve_msstats_con} \\
+                      -in_design ${exp_file} \\
+                      -method ISO \\
+                      -out out_msstats.csv \\
+                      -debug 10 \\
+                      > msstatsConverter.log
+   """
 }
 
 
@@ -1292,6 +1353,7 @@ process ptxqc {
      file "*.Rmd"
      file "*.pdf"
      file "*.txt"
+     file "*.log"
 
     script:
      """
@@ -1299,6 +1361,47 @@ process ptxqc {
      """
 }
 
+
+mzmls_multiqc.mix(mzmls_multiqc_picked)
+  .multiMap{ it ->
+      mzmls: it[1]
+  }
+  .set{ch_ptmt1}
+
+id_files_perc_multiqc.mix(id_files_idpep_multiqc)
+  .multiMap{ it ->
+      ids: it[1]
+  }
+  .set{ch_ptmt2}
+
+process pmultiqc {
+
+    label 'process_low'
+    label 'process_single_thread'
+
+    publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+    publishDir "${params.outdir}/multiqc", mode: 'copy'
+
+    input:
+     file design from ch_expdesign_multiqc
+     file 'mzMLs/*' from ch_ptmt1.mzmls.collect()
+     file 'proteomicslfq/*' from ch_out_mztab_multiqc
+     file 'raw_ids/*' from ch_ptmt2.ids.collect()
+
+    output:
+     file '*.html' into ch_multiqc_report
+     file '*.db'
+
+    script:
+     """
+     multiqc --exp_design ${design} \\
+             --mzMLs ./mzMLs \\
+             --quant_method tmt \\
+			 --raw_ids ./raw_ids \\
+             ./proteomicslfq \\
+             -o .
+     """
+}
 
 
 //--------------------------------------------------------------- //
