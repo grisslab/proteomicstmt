@@ -10,7 +10,7 @@ regexes = {
     'nf-core/proteomicsTMT': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'ThermorawfileParser': ['v_thermorawfileparser.txt', r"(\S+)"],
-	'IsobaricAnalyzer': ['v_isobaricanalyzer.txt', openms_version_regex],
+    'IsobaricAnalyzer': ['v_isobaricanalyzer.txt', openms_version_regex],
     'FileConverter': ['v_fileconverter.txt', openms_version_regex],
     'DecoyDatabase': ['v_decoydatabase.txt', openms_version_regex],
     'MSGFPlusAdapter': ['v_msgfplusadapter.txt', openms_version_regex],
@@ -26,13 +26,13 @@ regexes = {
     'FalseDiscoveryRate': ['v_falsediscoveryrate.txt', openms_version_regex],
     'IDPosteriorErrorProbability': ['v_idposteriorerrorprobability.txt', openms_version_regex],
     'IDMapper': ['v_idmapper.txt', openms_version_regex],
-	'FileMerger': ['v_filemerger.txt', openms_version_regex],
-	'Epifany': ['v_epifany.txt', openms_version_regex],
-	'IDConflictResolver': ['v_idconflictresolver', openms_version_regex],
-	'ProteinQuantifier': ['v_proteinquantifier.txt', openms_version_regex],
-	'MSstatsConverter': ['v_msstatsconverter.txt', openms_version_regex],
+    'FileMerger': ['v_filemerger.txt', openms_version_regex],
+    'Epifany': ['v_epifany.txt', openms_version_regex],
+    'IDConflictResolver': ['v_idconflictresolver', openms_version_regex],
+    'ProteinQuantifier': ['v_proteinquantifier.txt', openms_version_regex],
+    'MSstatsConverter': ['v_msstatsconverter.txt', openms_version_regex],
     'MSstatsTMT': ['v_msstats_tmt.txt', r"(\S+)"],
-	'pmultiqc': ['v_pmultiqc.txt', openms_version_regex]
+    'pmultiqc': ['v_pmultiqc.txt', openms_version_regex]
 }
 results = OrderedDict()
 results['nf-core/proteomicsTMT'] = '<span style="color:#999999;\">N/A</span>'

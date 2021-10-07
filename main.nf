@@ -1485,8 +1485,8 @@ process get_software_versions {
     echo \$(Epifany 2>&1) > v_epifany.txt || true
     echo \$(IDConflictResolver 2>&1) > v_idconflictresolver || true
     echo \$(ProteinQuantifier 2>&1) > v_proteinquantifier.txt || true
-	echo \$(MSstatsConverter 2>&1) > v_msstatsconverter.txt || true
-	multiqc --version &> v_pmultiqc.txt
+    echo \$(MSstatsConverter 2>&1) > v_msstatsconverter.txt || true
+    multiqc --version &> v_pmultiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
