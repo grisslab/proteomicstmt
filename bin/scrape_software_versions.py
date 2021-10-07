@@ -7,9 +7,10 @@ import re
 openms_version_regex = r"([0-9][.][0-9][.][0-9])"
 
 regexes = {
-    'nf-core/proteomicslfq': ['v_pipeline.txt', r"(\S+)"],
+    'nf-core/proteomicsTMT': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'ThermorawfileParser': ['v_thermorawfileparser.txt', r"(\S+)"],
+	'IsobaricAnalyzer': ['v_isobaricanalyzer.txt', openms_version_regex],
     'FileConverter': ['v_fileconverter.txt', openms_version_regex],
     'DecoyDatabase': ['v_decoydatabase.txt', openms_version_regex],
     'MSGFPlusAdapter': ['v_msgfplusadapter.txt', openms_version_regex],
@@ -24,13 +25,20 @@ regexes = {
     'IDScoreSwitcher': ['v_idscoreswitcher.txt', openms_version_regex],
     'FalseDiscoveryRate': ['v_falsediscoveryrate.txt', openms_version_regex],
     'IDPosteriorErrorProbability': ['v_idposteriorerrorprobability.txt', openms_version_regex],
-    'ProteomicsLFQ': ['v_proteomicslfq.txt', openms_version_regex],
-    'MSstats': ['v_msstats_plfq.txt', r"(\S+)"]
+    'IDMapper': ['v_idmapper.txt', openms_version_regex],
+	'FileMerger': ['v_filemerger.txt', openms_version_regex],
+	'Epifany': ['v_epifany.txt', openms_version_regex],
+	'IDConflictResolver': ['v_idconflictresolver', openms_version_regex],
+	'ProteinQuantifier': ['v_proteinquantifier.txt', openms_version_regex],
+	'MSstatsConverter': ['v_msstatsconverter.txt', openms_version_regex],
+    'MSstatsTMT': ['v_msstats_tmt.txt', r"(\S+)"],
+	'pmultiqc': ['v_pmultiqc.txt', openms_version_regex]
 }
 results = OrderedDict()
-results['nf-core/proteomicslfq'] = '<span style="color:#999999;\">N/A</span>'
+results['nf-core/proteomicsTMT'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['ThermorawfileParser'] = '<span style="color:#999999;\">N/A</span>'
+results['IsobaricAnalyzer'] = '<span style="color:#999999;\">N/A</span>'
 results['FileConverter'] = '<span style="color:#999999;\">N/A</span>'
 results['DecoyDatabase'] = '<span style="color:#999999;\">N/A</span>'
 results['MSGFPlusAdapter'] = '<span style="color:#999999;\">N/A</span>'
@@ -45,7 +53,14 @@ results['IDFilter'] = '<span style="color:#999999;\">N/A</span>'
 results['IDScoreSwitcher'] = '<span style="color:#999999;\">N/A</span>'
 results['FalseDiscoveryRate'] = '<span style="color:#999999;\">N/A</span>'
 results['IDPosteriorErrorProbability'] = '<span style="color:#999999;\">N/A</span>'
-results['ProteomicsLFQ'] = '<span style="color:#999999;\">N/A</span>'
+results['IDMapper'] = '<span style="color:#999999;\">N/A</span>'
+results['FileMerger'] = '<span style="color:#999999;\">N/A</span>'
+results['Epifany'] = '<span style="color:#999999;\">N/A</span>'
+results['IDConflictResolver'] = '<span style="color:#999999;\">N/A</span>'
+results['ProteinQuantifier'] = '<span style="color:#999999;\">N/A</span>'
+results['MSstatsConverter'] = '<span style="color:#999999;\">N/A</span>'
+results['MSstatsTMT'] = '<span style="color:#999999;\">N/A</span>'
+results['pmultiqc'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():
@@ -67,8 +82,8 @@ for k in list(results):
 print(
     """
 id: 'software_versions'
-section_name: 'nf-core/proteomicslfq Software Versions'
-section_href: 'https://github.com/nf-core/proteomicslfq'
+section_name: 'nf-core/proteomicsTMT Software Versions'
+section_href: 'https://github.com/nf-core/proteomicsTMT'
 plot_type: 'html'
 description: 'are collected at run time from the software output.'
 data: |

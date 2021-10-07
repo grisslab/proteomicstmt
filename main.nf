@@ -1467,6 +1467,7 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     ThermoRawFileParser.sh --version &> v_thermorawfileparser.txt
+    echo \$(IsobaricAnalyzer 2>&1) > v_isobaricanalyzer.txt || true
     echo \$(FileConverter 2>&1) > v_fileconverter.txt || true
     echo \$(DecoyDatabase 2>&1) > v_decoydatabase.txt || true
     echo \$(CometAdapter 2>&1) > v_cometadapter.txt || true
@@ -1479,6 +1480,13 @@ process get_software_versions {
     echo \$(IDScoreSwitcher 2>&1) > v_idscoreswitcher.txt || true
     echo \$(FalseDiscoveryRate 2>&1) > v_falsediscoveryrate.txt || true
     echo \$(IDPosteriorErrorProbability 2>&1) > v_idposteriorerrorprobability.txt || true
+    echo \$(IDMapper 2>&1) > v_idmapper.txt || true
+    echo \$(FileMerger 2>&1) > v_filemerger.txt || true
+    echo \$(Epifany 2>&1) > v_epifany.txt || true
+    echo \$(IDConflictResolver 2>&1) > v_idconflictresolver || true
+    echo \$(ProteinQuantifier 2>&1) > v_proteinquantifier.txt || true
+	echo \$(MSstatsConverter 2>&1) > v_msstatsconverter.txt || true
+	multiqc --version &> v_pmultiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
