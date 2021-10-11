@@ -1154,6 +1154,8 @@ process protein_epifany{
 	 """
 	 Epifany -in ${consus_file} \\
 	 		 -protein_fdr ${params.protein_fdr} \\
+	 		 -picked_fdr ${params.picked_fdr} \\
+	 		 -picked_decoy_string ${params.decoy_affix} \\
 	 		 -threads ${task.cpus} \\
 	 		 -debug 1 \\
 	 		 -greedy_group_resolution ${params.greedy_group_resolution} \\
@@ -1182,7 +1184,7 @@ process protein_inference{
 	script:
 	 """
 	 ProteinInference -in ${consus_file} \\
-	 		 -protein_fdr ${params.protein_fdr} \\
+	 		 -protein_fdr 'true' \\
 	 		 -picked_fdr ${params.picked_fdr} \\
 	 		 -picked_decoy_string ${params.decoy_affix} \\
 	 		 -threads ${task.cpus} \\
