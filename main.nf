@@ -1163,7 +1163,7 @@ process protein_epifany{
 	 """
 }
 
-process_protein_inference{
+process protein_inference{
 
   label 'process_medium'
 
