@@ -1231,9 +1231,6 @@ process resolve_conflict{
 	input:
 	 file(consus_epi_filt) from confict_res
 
-  when
-   params.protein_inference_bayesian
-
 	output:
 	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant
 
