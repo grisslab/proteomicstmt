@@ -127,7 +127,7 @@ def helpMessage() {
       --rt_tolerance				RT tolerance (in seconds) for the matching of peptide identifications and consensus features (Default 5.0).
       --mz_tolerance				m/z tolerance (in ppm or Da) for the matching of peptide identifications and consensus features(Default 20.0).
       --mz_measure					Unit of 'mz_tolerance'. ('ppm', 'Da',Default 'ppm')
-      --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used. 
+      --mz_reference				Source of m/z values for peptide identifications. If 'precursor', the precursor-m/z from the idXML is used.
 									If 'peptide',masses are computed from the sequences of peptide hits.(Defalut 'peptide')
 
 	FileMerger:
@@ -138,9 +138,13 @@ def helpMessage() {
 
 
     Inference:
+      --protein_inference_bayesian Beyesian is used if protein inference is done with Epifany
       --protein_fdr            		Additionally calculate the target-decoy FDR on protein-level based on the posteriors(Default false).
       --greedy_group_resolution		Default none.
       --top_PSMs					Consider only top X PSMs per spectrum. 0 considers all.(Default 1).
+      --picked_fdr        Consider to apply picked fdr in the ProteinInference tool
+      --protein_score     Protein Score to be use in the ProteinInference tool, options ("Best", "Product", "Sum" , "Maximum")
+
 
     IDConflictResolver:
       --resolve_between_features	A map may contain multiple features with both identical (possibly modified i.e. not stripped) sequence and charge state. 							   The feature with the 'highest intensity' is very likely the most reliable one.Default(off),highest_intensity
@@ -502,7 +506,7 @@ if (params.num_enzyme_termini == "fully")
 
 process isobaric_analyzer {
 	label 'process_medium'
-	
+
 	publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
 	input:
@@ -1083,7 +1087,7 @@ process idmapper{
 
 	input:
 	 tuple mzml_id, file(id_file_filter), file(consensusXML) from ptmt_in_id.mix(ptmt_in_id_luciphor).combine(id_files_consensusXML, by: 0)
-	 
+
 	output:
 	 file("${id_file_filter.baseName}_map.consensusXML") into id_map_to_merger
 
@@ -1130,14 +1134,17 @@ process file_merge{
 }
 
 
-process epifany{
+process protein_epifany{
+
 	label 'process_medium'
-    
-    publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+
+  publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+
+  when:
+   params.protein_inference_bayesian
 
 	input:
 	 file(consus_file) from id_merge_to_epi
-
 
 	output:
 	 file("${consus_file.baseName}_epi.consensusXML") into epi_idfilter
@@ -1153,31 +1160,59 @@ process epifany{
 			 -algorithm:top_PSMs ${params.top_PSMs} \\
 			 -out ${consus_file.baseName}_epi.consensusXML \\
 			 > ${consus_file.baseName}_epi.log
-	 """                                       
+	 """
 }
 
+process_protein_inference{
+
+  label 'process_medium'
+
+  publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+
+  when:
+   !params.protein_inference_bayesian
+
+	input:
+	 file(consus_file) from id_merge_to_epi
+
+	output:
+	 file("${consus_file.baseName}_epi.consensusXML") into epi_idfilter
+
+	 // expdes currently unused
+	script:
+	 """
+	 ProteinInference -in ${consus_file} \\
+	 		 -protein_fdr ${params.protein_fdr} \\
+	 		 -picked_fdr ${params.picked_fdr} \\
+	 		 -picked_decoy_string ${params.decoy_affix} \\
+	 		 -threads ${task.cpus} \\
+	 		 -debug 1 \\
+	 		 -score_aggregation_method ${params.protein_score} \\
+			 -out ${consus_file.baseName}_epi.consensusXML \\
+			 > ${consus_file.baseName}_epi.log
+	 """
+}
 
 process epi_filter{
 	label 'process_very_low'
-    label 'process_single_thread'
+  label 'process_single_thread'
 
-    publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
+  publishDir "${params.outdir}/logs", mode: 'copy', pattern: '*.log'
 
-    input:
-     file(consus_epi) from epi_idfilter
+  input:
+   file(consus_epi) from epi_idfilter
+
+  output:
+   file("${consus_epi.baseName}_filt.consensusXML") into confict_res
 
 
-    output:
-     file("${consus_epi.baseName}_filt.consensusXML") into confict_res
-
-
-    script:
-    """
-    IDFilter -in ${consus_epi} \\
-             -out ${consus_epi.baseName}_filt.consensusXML \\
-             -threads ${task.cpus} \\
-             -score:prot ${params.protein_level_fdr_cutoff}
-             > ${consus_epi.baseName}_idfilter.log
+  script:
+  """
+  IDFilter -in ${consus_epi} \\
+       -out ${consus_epi.baseName}_filt.consensusXML \\
+       -threads ${task.cpus} \\
+       -score:prot ${params.protein_level_fdr_cutoff}
+       > ${consus_epi.baseName}_idfilter.log
     """
 }
 
@@ -1191,6 +1226,8 @@ process resolve_conflict{
 	input:
 	 file(consus_epi_filt) from confict_res
 
+  when
+   params.protein_inference_bayesian
 
 	output:
 	 file "${consus_epi_filt.baseName}_resconf.consensusXML" into pro_quant
@@ -1229,7 +1266,7 @@ process pro_quant{
 	 script:
 
 	 if( params.mztab_export )
-	 	"""	
+	 	"""
 	 	ProteinQuantifier -in ${epi_filt_resolve} \\
 	 				   	-design ${pro_quant_exp} \\
 	 				   	-out protein_out.csv \\
@@ -1245,7 +1282,7 @@ process pro_quant{
 	 				   	> pro_quant.log
 	 	"""
 
-	 else 
+	 else
 	 	"""
 	 	ProteinQuantifier -in ${epi_filt_resolve} \\
 	 				   	-design ${pro_quant_exp} \\
