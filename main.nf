@@ -143,7 +143,7 @@ def helpMessage() {
       --greedy_group_resolution		Default none.
       --top_PSMs					Consider only top X PSMs per spectrum. 0 considers all.(Default 1).
       --picked_fdr        Consider to apply picked fdr in the ProteinInference tool
-      --protein_score     Protein Score to be use in the ProteinInference tool, options ("Best", "Product", "Sum" , "Maximum")
+      --protein_score     Protein Score to be use in the ProteinInference tool, options ("Best", "Product", "Sum")
 
 
     IDConflictResolver:
