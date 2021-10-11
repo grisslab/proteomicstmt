@@ -1147,7 +1147,7 @@ process protein_epifany{
 	 file(consus_file) from id_merge_to_epi
 
 	output:
-	 file("${consus_file.baseName}_epi.consensusXML") into epi_idfilter
+	 file("${consus_file.baseName}_epi.consensusXML") into epi_inference
 
 	 // expdes currently unused
 	script:
@@ -1176,7 +1176,7 @@ process protein_inference{
 	 file(consus_file) from id_merge_to_epi
 
 	output:
-	 file("${consus_file.baseName}_epi.consensusXML") into epi_idfilter
+	 file("${consus_file.baseName}_epi.consensusXML") into protein_inference
 
 	 // expdes currently unused
 	script:
@@ -1193,7 +1193,12 @@ process protein_inference{
 	 """
 }
 
+epi_idfilter = params.protein_inference_bayesian
+               ? epi_inference
+               : protein_inference
+
 process epi_filter{
+
 	label 'process_very_low'
   label 'process_single_thread'
 
