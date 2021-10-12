@@ -1200,7 +1200,7 @@ process protein_epifany{
 	 		 -greedy_group_resolution ${params.greedy_group_resolution} \\
 			 -algorithm:top_PSMs ${params.top_PSMs} \\
 			 -out ${consus_file.baseName}_epi.consensusXML \\
-			 > ${consus_file.baseName}_epi.log
+			 > ${consus_file.baseName}_inference.log
 	 """
 }
 
@@ -1230,7 +1230,7 @@ process protein_inference{
 	 		 -debug 1 \\
 	 		 -score_aggregation_method ${params.protein_score} \\
 			 -out ${consus_file.baseName}_epi.consensusXML \\
-			 > ${consus_file.baseName}_epi.log
+			 > ${consus_file.baseName}_inference.log
 	 """
 }
 
