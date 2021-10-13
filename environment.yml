@@ -6,7 +6,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-#  - openms::openms=2.7.0pre
+  - openms::openms=2.7.0pre
   - openms::openms-thirdparty=2.7.0pre
   - bioconda::bioconductor-msstats=3.20.1 # will include R
   - bioconda::sdrf-pipelines=0.0.18 # for SDRF conversion
