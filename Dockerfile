@@ -4,7 +4,8 @@ LABEL authors="Dai Cheng Xin, Yasset Perez-Riverol, Julianus Pfeuffer" \
 
 # Install the conda environment
 COPY environment.yml /
-RUN conda env create --quiet -f /environment.yml && conda clean -a
+RUN conda install mamba -c conda-forge
+RUN mamba env create --quiet -f /environment.yml && mamba clean -a
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
 ENV PATH /opt/conda/envs/nf-core-proteomicstmt-1.0dev/bin:$PATH
